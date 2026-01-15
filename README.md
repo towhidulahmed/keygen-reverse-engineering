@@ -13,13 +13,15 @@ The binary `keygenme3` prompts for an email address and a serial number. The obj
 ### Initial Binary Inspection
 
 The binary was first inspected using the `file` command:
+
 ```bash
-file binary/keygenme3
+file challenge/keygenme3
 ```
 
 ```
 keygenme3: ELF 64-bit LSB executable, x86-64, version 1 (SYSV),
 dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2,
+BuildID[sha1]=84fc4344dc69402219a6f4cbfe4c04fa00961ff1, 
 for GNU/Linux 3.2.0, stripped
 ```
 
@@ -27,7 +29,9 @@ This revealed that the file is an ELF 64-bit LSB executable for the x86-64 archi
 
 ### Ghidra Analysis
 
-The binary was opened in Ghidra for decompilation and analysis. During the analysis, several functions and variable names were renamed for clarity. Two important functions were identified and renamed as `main` and `serial_check`.
+The binary was opened in Ghidra for decompilation and analysis. Since the binary was stripped, Ghidra assigned generic names to all functions. After auto-analysis, two important functions were identified and renamed:
+- Entry point function → `main`
+- Validation function → `serial_check`
 
 ![Ghidra Main Function Analysis](images/main_fun_ghidra.png)
 
@@ -50,7 +54,69 @@ sprintf(local_38, "%04x-%04x", local_44, local_40);
 
 The generated string is then compared against the provided serial number. If they match, the program outputs a success message.
 
-## Algorithm Implementation
+### Algorithm Breakdown
+
+The decompiled `serial_check` function:
+
+```c
+bool serial_check(char *email, char *serial)
+{
+  int iVar1;
+  size_t sVar2;
+  uint local_44;
+  uint local_40;
+  int local_3c;
+  char local_38[24];
+  
+  local_44 = 0;
+  local_40 = 0;
+  local_3c = 0;
+  
+  while (true) {
+    sVar2 = strlen(email);
+    if (sVar2 <= (ulong)(long)local_3c) break;
+    
+    local_44 = local_44 + (int)email[local_3c] * 8;
+    local_40 = (local_40 + (int)email[local_3c] * (int)email[local_3c]) - 0xbc;
+    local_3c = local_3c + 1;
+  }
+  
+  sprintf(local_38, "%04x-%04x", local_44, local_40);
+  iVar1 = strcmp(serial, local_38);
+  return iVar1 == 0;
+}
+```
+
+**Variable purposes**:
+- `local_44` - Sum of (character × 8)
+- `local_40` - Sum of (character² - 0xbc)
+- `local_3c` - Loop index
+- `local_38` - Generated serial string buffer
+
+### Manual Calculation Example
+
+For email "pr0cracker":
+
+**Characters**: p(112), r(114), 0(48), c(99), r(114), a(97), c(99), k(107), e(101), r(114)
+
+**local_44 calculation** (character × 8):
+```
+112×8 + 114×8 + 48×8 + 99×8 + 114×8 + 97×8 + 99×8 + 107×8 + 101×8 + 114×8
+= 896 + 912 + 384 + 792 + 912 + 776 + 792 + 856 + 808 + 912
+= 8040 = 0x1f68
+```
+
+**local_40 calculation** (character² - 188):
+```
+(112²-188) + (114²-188) + (48²-188) + (99²-188) + (114²-188) + 
+(97²-188) + (99²-188) + (107²-188) + (101²-188) + (114²-188)
+= 12356 + 12808 + 2116 + 9613 + 12808 + 9221 + 9613 + 11261 + 10013 + 12808
+= 102617 = 0x190d9
+```
+
+**Result**: Serial = `1f68-190d9`
+
+## Keygen Implementation
 
 To replicate this logic, a C program was written that implements the same calculation:
 
@@ -80,11 +146,16 @@ int main(int argc, char *argv[]) {
 
 ## Testing
 
-To verify the implementation, compile and run the keygen:
+Compile the keygen:
 
 ```bash
-gcc src/cracker.c -o bin/cracker
-./bin/cracker pr0cracker
+gcc src/cracker.c -o keygen/cracker
+```
+
+Generate a serial for the user "pr0cracker":
+
+```bash
+./keygen/cracker pr0cracker
 ```
 
 Output:
@@ -92,10 +163,10 @@ Output:
 1f68-190d9
 ```
 
-The generated serial `1f68-190d9` was then tested with the original binary:
+Verify with the original binary:
 
 ```bash
-./binary/keygenme3
+./challenge/keygenme3
 ```
 
 ```
@@ -118,24 +189,14 @@ The binary validates user input by deriving a serial number from the email addre
 
 ```
 keygen-reverse-engineering/
-├── binary/keygenme3    # Original challenge binary
-├── src/cracker.c       # Keygen implementation
-├── images/             # Analysis screenshots
-└── Makefile           # Build configuration
-```
-
-## Building
-
-Compile the keygen using:
-
-```bash
-gcc src/cracker.c -o bin/cracker
-```
-
-Or use the provided Makefile:
-
-```bash
-make cracker
+├── challenge/
+│   └── keygenme3       # Original challenge binary
+├── src/
+│   ├── cracker.c       # Keygen implementation
+│   ├── main.c          # Reimplementation of keygenme3
+│   └── varify.c        # Serial verification tool
+├── keygen/             # Compiled binaries
+└── images/             # Ghidra analysis screenshots
 ```
 
 ## Tools Used
@@ -146,6 +207,10 @@ make cracker
 ## Notes
 
 Variable names like `local_44`, `local_40`, and `local_3c` are Ghidra's auto-generated names based on stack offsets. They were kept in the implementation to maintain traceability with the decompiled code.
+
+## License
+
+This project is for educational purposes only.
 
 ## License
 
