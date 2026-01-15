@@ -1,4 +1,4 @@
-# A KeygenMe Reverse Engineering Challenge
+# A Keygen Reverse Engineering Challenge
 
 ![Ghidra](https://img.shields.io/badge/Ghidra-Analysis-red?logo=ghidra)
 ![C](https://img.shields.io/badge/C-Programming-blue?logo=c)
