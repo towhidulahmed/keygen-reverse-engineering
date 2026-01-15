@@ -1,12 +1,25 @@
 # Compiled binaries
-bin/cracker
-bin/main
-bin/varify
+bin/
 
 # macOS
 .DS_Store
+._*
 
-# Editor backups
+# Linux
 *~
+
+# Editor backups and temp files
 *.swp
 *.swo
+*.swn
+.vscode/
+.idea/
+
+# Build artifacts
+*.o
+*.out
+*.exe
+a.out
+
+# Logs
+*.log
