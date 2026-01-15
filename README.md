@@ -6,8 +6,6 @@ Reverse engineering challenge to understand the serial validation mechanism of a
 
 The binary `keygenme3` prompts for an email address and a serial number. The objective was to reverse engineer the validation logic and recover the correct serial for a given user.
 
-![KeygenMe3 Running](images/run_keygenme3.png)
-
 ## Analysis Method
 
 ### Initial Binary Inspection
@@ -177,6 +175,8 @@ Correct serial! Software unlocked.
 ********************************
 ```
 
+![KeygenMe3 Running](images/run_keygenme3.png)
+
 The program successfully validated the input and displayed the success message.
 
 ## Conclusion
@@ -207,10 +207,6 @@ keygen-reverse-engineering/
 ## Notes
 
 Variable names like `local_44`, `local_40`, and `local_3c` are Ghidra's auto-generated names based on stack offsets. They were kept in the implementation to maintain traceability with the decompiled code.
-
-## License
-
-This project is for educational purposes only.
 
 ## License
 
