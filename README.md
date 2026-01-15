@@ -1,4 +1,7 @@
-# KeygenMe3 Reverse Engineering Challenge
+# A KeygenMe Reverse Engineering Challenge
+
+![Ghidra](https://img.shields.io/badge/Ghidra-Analysis-red?logo=ghidra)
+![C](https://img.shields.io/badge/C-Programming-blue?logo=c)
 
 Reverse engineering challenge to understand the serial validation mechanism of a stripped x86-64 ELF binary and generate valid serial numbers for any given email address.
 
