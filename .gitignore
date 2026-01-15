@@ -1,0 +1,12 @@
+# Compiled binaries
+bin/cracker
+bin/main
+bin/varify
+
+# macOS
+.DS_Store
+
+# Editor backups
+*~
+*.swp
+*.swo
